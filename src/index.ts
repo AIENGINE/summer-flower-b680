@@ -83,21 +83,50 @@ async function call_electronics_dept(customerQuery: string): Promise<string> {
 
 
 async function call_travel_dept(customerQuery: string): Promise<string> {
-	const response = await fetch('https://api.langbase.com/beta/generate', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': 'Bearer pipe_5QHV1P2zQPKuaxqZjakateF9xTQweTRab4dyhTz2ccrzrhMEzRZAkTiF28b1ksHbHpnPqh9RZZev5Z1agnErHDGv'
-		},
-		body: JSON.stringify({
-			messages: [{
-				role: 'user',
-				content: customerQuery
-			}]
-		})
-	});
-	const data = (await response.json()) as { choices: { message: { content: string } }[] };
-	return data.choices[0].message.content;
+	try{ 
+
+		const response = await fetch('https://api.langbase.com/beta/generate', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer pipe_43gXatvZihUuNHPkTB8HGviTfSiSXswNh8H1j2HjD2ZY2SdnuHhRVV7iFrbXC1Da5ZTNu3z1bVtyUuKZ4BaxZhow'
+			},
+			body: JSON.stringify({
+				messages: [{
+					role: 'user',
+					content: customerQuery
+				}]
+			})
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const data = await response.json();
+		console.log('API Response:', JSON.stringify(data, null, 2));
+
+		// Check if data is a string (JSON string)
+		if (typeof data === 'string') {
+			try {
+				const parsedData = JSON.parse(data);
+				return `Ticket No.: ${parsedData['Ticket No.']}, Classification: ${parsedData['Classification']}`;
+			} catch (parseError) {
+				console.error('Error parsing JSON string:', parseError);
+				return data; // Return the original string if parsing fails
+			}
+		}
+
+		// If data is already an object
+		if (data && typeof data === 'object') {
+			return `Ticket No.: ${data['Ticket No.']}, Classification: ${data['Classification']}`;
+		}
+
+		throw new Error('Unexpected response format');
+	} catch (error) {
+		console.error('Error in call_travel_dept:', error);
+		return `Error processing request: ${error.message}, we are working on it please be patient`;
+	}
 }
 
 export interface Env {
