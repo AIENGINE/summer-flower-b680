@@ -11,130 +11,24 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
+// TODO: Parse threadid to continue conversation thread
+
 import { OpenAI } from 'openai';
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
 
-async function call_sports_dept(customerQuery: string): Promise<string> {
-	const response = await fetch('https://api.langbase.com/beta/generate', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: 'Bearer pipe_5QHV1P2zQPKuaxqZjakateF9xTQweTRab4dyhTz2ccrzrhMEzRZAkTiF28b1ksHbHpnPqh9RZZev5Z1agnErHDGv',
-		},
-		body: JSON.stringify({
-			messages: [
-				{
-					role: 'user',
-					content: customerQuery,
-				},
-			],
-		}),
-	});
-	const data = (await response.json()) as { choices: { message: { content: string } }[] };
 
-	return data.choices[0].message.content;
-}
-
-async function call_electronics_dept(customerQuery: string): Promise<string> {
-	try {
-		const response = await fetch('https://api.langbase.com/beta/generate', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': 'Bearer pipe_5QHV1P2zQPKuaxqZjakateF9xTQweTRab4dyhTz2ccrzrhMEzRZAkTiF28b1ksHbHpnPqh9RZZev5Z1agnErHDGv'
-			},
-			body: JSON.stringify({
-				messages: [{
-					role: 'user',
-					content: customerQuery
-				}]
-			})
-		});
-
-		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}`);
-		}
-
-		const data = await response.json();
-		console.log('API Response:', JSON.stringify(data, null, 2));
-
-		// Check if data is a string (JSON string)
-		if (typeof data === 'string') {
-			try {
-				const parsedData = JSON.parse(data);
-				return `Ticket No.: ${parsedData['Ticket No.']}, Classification: ${parsedData['Classification']}`;
-			} catch (parseError) {
-				console.error('Error parsing JSON string:', parseError);
-				return data; // Return the original string if parsing fails
-			}
-		}
-
-		// If data is already an object
-		if (data && typeof data === 'object') {
-			return `Ticket No.: ${data['Ticket No.']}, Classification: ${data['Classification']}`;
-		}
-
-		throw new Error('Unexpected response format');
-	} catch (error) {
-		console.error('Error in call_electronics_dept:', error);
-		return `Error processing request: ${error.message}, we are working on it please be patient`;
-	}
-}
-
-
-async function call_travel_dept(customerQuery: string): Promise<string> {
-	try{ 
-
-		const response = await fetch('https://api.langbase.com/beta/generate', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': 'Bearer pipe_43gXatvZihUuNHPkTB8HGviTfSiSXswNh8H1j2HjD2ZY2SdnuHhRVV7iFrbXC1Da5ZTNu3z1bVtyUuKZ4BaxZhow'
-			},
-			body: JSON.stringify({
-				messages: [{
-					role: 'user',
-					content: customerQuery
-				}]
-			})
-		});
-
-		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}`);
-		}
-
-		const data = await response.json();
-		console.log('API Response:', JSON.stringify(data, null, 2));
-
-		// Check if data is a string (JSON string)
-		if (typeof data === 'string') {
-			try {
-				const parsedData = JSON.parse(data);
-				return `Ticket No.: ${parsedData['Ticket No.']}, Classification: ${parsedData['Classification']}`;
-			} catch (parseError) {
-				console.error('Error parsing JSON string:', parseError);
-				return data; // Return the original string if parsing fails
-			}
-		}
-
-		// If data is already an object
-		if (data && typeof data === 'object') {
-			return `Ticket No.: ${data['Ticket No.']}, Classification: ${data['Classification']}`;
-		}
-
-		throw new Error('Unexpected response format');
-	} catch (error) {
-		console.error('Error in call_travel_dept:', error);
-		return `Error processing request: ${error.message}, we are working on it please be patient`;
-	}
-}
 
 export interface Env {
 	OPENAI_API_KEY: string;
+	LANGBASE_TRAVEL_PIPE_API_KEY: string,
+	LANGBASE_ELECTRONICS_PIPE_API_KEY: string,
+	LANGBASE_SPORTS_PIPE_API_KEY: string
 }
 
 export default {
-	async fetch(request: Request, env: { OPENAI_API_KEY: string }, ctx: ExecutionContext): Promise<Response> {
+	async fetch(request: Request, env: 
+		{ OPENAI_API_KEY: string, LANGBASE_SPORTS_PIPE_API_KEY: string, LANGBASE_ELECTRONICS_PIPE_API_KEY: string, LANGBASE_TRAVEL_PIPE_API_KEY: string}, 
+		ctx: ExecutionContext): Promise<Response> {
 		if (!env.OPENAI_API_KEY) {
 			return new Response('OPENAI_API_KEY is not set', { status: 500 });
 		}
@@ -142,6 +36,150 @@ export default {
 		const openai = new OpenAI({
 			apiKey: env.OPENAI_API_KEY,
 		});
+
+
+		async function call_sports_dept(customerQuery: string): Promise<string> {
+			try {
+				const response = await fetch('https://api.langbase.com/beta/generate', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${env.LANGBASE_SPORTS_PIPE_API_KEY}`,
+					},
+					body: JSON.stringify({
+						messages: [
+							{
+								role: 'user',
+								content: customerQuery,
+							},
+						],
+					}),
+				});
+		
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+		
+				const data = await response.json();
+				console.log('API Response:', JSON.stringify(data, null, 2));
+		
+				// Check if data is a string (JSON string)
+				if (typeof data === 'string') {
+					try {
+						const parsedData = JSON.parse(data);
+						return `Ticket No.: ${parsedData['Ticket No.']}, Classification: ${parsedData['Classification']}`;
+					} catch (parseError) {
+						console.error('Error parsing JSON string:', parseError);
+						return data; // Return the original string if parsing fails
+					}
+				}
+		
+				// If data is already an object
+				if (data && typeof data === 'object') {
+					return `Ticket No.: ${data['Ticket No.']}, Classification: ${data['Classification']}`;
+				}
+		
+				throw new Error('Unexpected response format');
+			} catch (error) {
+				console.error('Error in call_sports_dept:', error);
+				return `Error processing request: ${error.message}, we are working on it please be patient`;
+			}
+		}
+
+		async function call_electronics_dept(customerQuery: string): Promise<string> {
+			try {
+				const response = await fetch('https://api.langbase.com/beta/generate', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${env.LANGBASE_ELECTRONICS_PIPE_API_KEY}`
+					},
+					body: JSON.stringify({
+						messages: [{
+							role: 'user',
+							content: customerQuery
+						}]
+					})
+				});
+		
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+		
+				const data = await response.json();
+				console.log('API Response:', JSON.stringify(data, null, 2));
+		
+				// Check if data is a string (JSON string)
+				if (typeof data === 'string') {
+					try {
+						const parsedData = JSON.parse(data);
+						return `Ticket No.: ${parsedData['Ticket No.']}, Classification: ${parsedData['Classification']}`;
+					} catch (parseError) {
+						console.error('Error parsing JSON string:', parseError);
+						return data; // Return the original string if parsing fails
+					}
+				}
+		
+				// If data is already an object
+				if (data && typeof data === 'object') {
+					return `Ticket No.: ${data['Ticket No.']}, Classification: ${data['Classification']}`;
+				}
+		
+				throw new Error('Unexpected response format');
+			} catch (error) {
+				console.error('Error in call_electronics_dept:', error);
+				return `Error processing request: ${error.message}, we are working on it please be patient`;
+			}
+		}
+		
+		
+		async function call_travel_dept(customerQuery: string): Promise<string> {
+			try{ 
+		
+				const response = await fetch('https://api.langbase.com/beta/generate', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${env.LANGBASE_TRAVEL_PIPE_API_KEY}`
+					},
+					body: JSON.stringify({
+						messages: [{
+							role: 'user',
+							content: customerQuery
+						}]
+					})
+				});
+		
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+		
+				const data = await response.json();
+				console.log('API Response:', JSON.stringify(data, null, 2));
+		
+				// Check if data is a string (JSON string)
+				if (typeof data === 'string') {
+					try {
+						const parsedData = JSON.parse(data);
+						return `Ticket No.: ${parsedData['Ticket No.']}, Classification: ${parsedData['Classification']}`;
+					} catch (parseError) {
+						console.error('Error parsing JSON string:', parseError);
+						return data; // Return the original string if parsing fails
+					}
+				}
+		
+				// If data is already an object
+				if (data && typeof data === 'object') {
+					return `Ticket No.: ${data['Ticket No.']}, Classification: ${data['Classification']}`;
+				}
+		
+				throw new Error('Unexpected response format');
+			} catch (error) {
+				console.error('Error in call_travel_dept:', error);
+				return `Error processing request: ${error.message}, we are working on it please be patient`;
+			}
+		}
+		
 
 		const url = new URL(request.url);
 		const customerQuery = url.searchParams.get('query');
