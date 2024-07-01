@@ -63,20 +63,14 @@ export default {
 				const data = await response.json();
 				console.log('API Response:', JSON.stringify(data, null, 2));
 		
-				// Check if data is a string (JSON string)
-				if (typeof data === 'string') {
+				if (data && data.completion) {
 					try {
-						const parsedData = JSON.parse(data);
-						return `Ticket No.: ${parsedData['Ticket No.']}, Classification: ${parsedData['Classification']}`;
+						const parsedCompletion = JSON.parse(data.completion);
+						return `Ticket No.: ${parsedCompletion['Ticket No.']}, Classification: ${parsedCompletion['Classification']}`;
 					} catch (parseError) {
-						console.error('Error parsing JSON string:', parseError);
-						return data; // Return the original string if parsing fails
+						console.error('Error parsing completion JSON:', parseError);
+						return data.completion; // Return the original completion string if parsing fails
 					}
-				}
-		
-				// If data is already an object
-				if (data && typeof data === 'object') {
-					return `Ticket No.: ${data['Ticket No.']}, Classification: ${data['Classification']}`;
 				}
 		
 				throw new Error('Unexpected response format');
@@ -109,20 +103,14 @@ export default {
 				const data = await response.json();
 				console.log('API Response:', JSON.stringify(data, null, 2));
 		
-				// Check if data is a string (JSON string)
-				if (typeof data === 'string') {
+				if (data && data.completion) {
 					try {
-						const parsedData = JSON.parse(data);
-						return `Ticket No.: ${parsedData['Ticket No.']}, Classification: ${parsedData['Classification']}`;
+						const parsedCompletion = JSON.parse(data.completion);
+						return `Ticket No.: ${parsedCompletion['Ticket No.']}, Classification: ${parsedCompletion['Classification']}`;
 					} catch (parseError) {
-						console.error('Error parsing JSON string:', parseError);
-						return data; // Return the original string if parsing fails
+						console.error('Error parsing completion JSON:', parseError);
+						return data.completion; // Return the original completion string if parsing fails
 					}
-				}
-		
-				// If data is already an object
-				if (data && typeof data === 'object') {
-					return `Ticket No.: ${data['Ticket No.']}, Classification: ${data['Classification']}`;
 				}
 		
 				throw new Error('Unexpected response format');
@@ -157,20 +145,14 @@ export default {
 				const data = await response.json();
 				console.log('API Response:', JSON.stringify(data, null, 2));
 		
-				// Check if data is a string (JSON string)
-				if (typeof data === 'string') {
+				if (data && data.completion) {
 					try {
-						const parsedData = JSON.parse(data);
-						return `Ticket No.: ${parsedData['Ticket No.']}, Classification: ${parsedData['Classification']}`;
+						const parsedCompletion = JSON.parse(data.completion);
+						return `Ticket No.: ${parsedCompletion['Ticket No.']}, Classification: ${parsedCompletion['Classification']}`;
 					} catch (parseError) {
-						console.error('Error parsing JSON string:', parseError);
-						return data; // Return the original string if parsing fails
+						console.error('Error parsing completion JSON:', parseError);
+						return data.completion; // Return the original completion string if parsing fails
 					}
-				}
-		
-				// If data is already an object
-				if (data && typeof data === 'object') {
-					return `Ticket No.: ${data['Ticket No.']}, Classification: ${data['Classification']}`;
 				}
 		
 				throw new Error('Unexpected response format');
